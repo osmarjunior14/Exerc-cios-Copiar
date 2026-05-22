@@ -1,0 +1,610 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#14213d" />
+    <title>PLANNUM360</title>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div>
+        <img class="brand-logo" src="assets/logo_plannum360.png" alt="PLANNUM360" />
+        <p class="eyebrow">Prescrição de treino</p>
+        <h1>PLANNUM360</h1>
+        <p class="header-subtitle">Consultoria, avaliação, prescrição e acompanhamento em um só lugar.</p>
+        <span class="privacy-pill">Uso pessoal e local</span>
+      </div>
+      <div class="header-actions">
+        <button class="ghost-button" id="logoutApp" type="button">Sair</button>
+        <button class="ghost-button" id="exportData" type="button">Exportar</button>
+        <label class="ghost-button file-action">
+          Importar
+          <input id="importData" type="file" accept="application/json" />
+        </label>
+      </div>
+    </header>
+
+    <main class="app-shell">
+      <nav class="tabs" aria-label="Abas do aplicativo">
+        <button class="tab active" data-tab="dashboard" data-roles="teacher" type="button">Dashboard</button>
+        <button class="tab" data-tab="student" data-roles="teacher" type="button">Cadastro do aluno</button>
+        <button class="tab" data-tab="anamnesis" data-roles="teacher" type="button">Anamnese</button>
+        <button class="tab" data-tab="assessment" data-roles="teacher" type="button">Avaliação Física</button>
+        <button class="tab" data-tab="planning" data-roles="teacher" type="button">Periodização</button>
+        <button class="tab" data-tab="library" data-roles="teacher" type="button">Biblioteca</button>
+        <button class="tab" data-tab="prescription" data-roles="teacher" type="button">Prescrição</button>
+        <button class="tab" data-tab="studentApp" data-roles="teacher,student" type="button">Área do aluno</button>
+        <button class="tab" data-tab="followup" data-roles="teacher" type="button">Acompanhamento</button>
+        <button class="tab" data-tab="schedule" data-roles="teacher" type="button">Agenda</button>
+        <button class="tab" data-tab="finance" data-roles="teacher" type="button">Financeiro</button>
+        <button class="tab" data-tab="reports" data-roles="teacher,student" type="button">Relatórios</button>
+        <button class="tab" data-tab="settings" data-roles="teacher" type="button">Ajustes</button>
+      </nav>
+
+      <section class="panel active" id="dashboard">
+        <div class="section-head">
+          <div>
+            <h2>Dashboard</h2>
+            <p>Resumo operacional para acompanhar aluno, treinos, evolução e próximas ações.</p>
+          </div>
+          <button class="primary-button" id="refreshDashboard" type="button">Atualizar</button>
+        </div>
+        <div class="metric-grid" id="metricGrid"></div>
+        <div class="dashboard-layout">
+          <div>
+            <h3>Próximas ações</h3>
+            <div id="nextActions" class="history-list"></div>
+          </div>
+          <div>
+            <h3>Evolução corporal</h3>
+            <div class="chart" id="weightChart"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" id="student">
+        <div class="section-head">
+          <div>
+            <h2>Cadastro do aluno</h2>
+            <p>Dados principais, objetivo, restrições e contato.</p>
+          </div>
+          <button class="primary-button" id="saveStudent" type="button">Salvar aluno</button>
+        </div>
+        <form class="grid-form" id="studentForm">
+          <label>Nome completo<input name="name" required placeholder="Nome do aluno" /></label>
+          <label>Telefone<input name="phone" placeholder="(00) 00000-0000" /></label>
+          <label>E-mail<input name="email" type="email" placeholder="aluno@email.com" /></label>
+          <label>Data de nascimento<input name="birthdate" type="date" /></label>
+          <label>Sexo
+            <select name="sex">
+              <option value="">Selecionar</option>
+              <option>Feminino</option>
+              <option>Masculino</option>
+              <option>Outro</option>
+            </select>
+          </label>
+          <label>Nível
+            <select name="level">
+              <option>Iniciante</option>
+              <option>Intermediário</option>
+              <option>Avançado</option>
+            </select>
+          </label>
+          <label>Plano atual<input name="planName" placeholder="Consultoria, presencial, online..." /></label>
+          <label>Início do acompanhamento<input name="startDate" type="date" /></label>
+          <label>Próxima reavaliação<input name="nextAssessment" type="date" /></label>
+          <label class="wide">Objetivo<textarea name="goal" placeholder="Hipertrofia, emagrecimento, performance, saúde..."></textarea></label>
+          <label class="wide">Restrições, lesões e observações clínicas<textarea name="restrictions"></textarea></label>
+        </form>
+      </section>
+
+      <section class="panel" id="anamnesis">
+        <div class="section-head">
+          <div>
+            <h2>Anamnese</h2>
+            <p>Questionário rápido para riscos, rotina, sono, dor e aderência.</p>
+          </div>
+          <button class="primary-button" id="saveAnamnesis" type="button">Salvar anamnese</button>
+        </div>
+        <form class="grid-form" id="anamnesisForm">
+          <label>PAR-Q / liberação médica
+            <select name="parq">
+              <option>Sem restrições aparentes</option>
+              <option>Exige liberação médica</option>
+              <option>Em acompanhamento médico</option>
+            </select>
+          </label>
+          <label>Horas de sono<input name="sleepHours" type="number" min="0" max="14" step="0.5" /></label>
+          <label>Estresse percebido
+            <select name="stress">
+              <option>Baixo</option>
+              <option>Moderado</option>
+              <option>Alto</option>
+            </select>
+          </label>
+          <label>Dias disponíveis/semana<input name="availableDays" type="number" min="1" max="7" /></label>
+          <label>Tempo por treino<input name="sessionTime" placeholder="45 min, 60 min..." /></label>
+          <label>Experiência anterior<input name="trainingHistory" placeholder="Nunca treinou, 1 ano, 5 anos..." /></label>
+          <label>Preferências<textarea name="preferences" placeholder="Exercícios favoritos, horários, equipamentos..."></textarea></label>
+          <label>Dores atuais<textarea name="pain" placeholder="Local, intensidade, gatilhos..." ></textarea></label>
+          <label class="wide">Alertas para prescrição<textarea name="alerts" placeholder="Movimentos a evitar, progressões cautelosas, observações do profissional..."></textarea></label>
+        </form>
+      </section>
+
+      <section class="panel" id="assessment">
+        <div class="section-head">
+          <div>
+            <h2>Avaliação Física</h2>
+            <p>Perimetrias, dobras cutâneas, composição corporal e indicadores de evolução.</p>
+          </div>
+          <button class="primary-button" id="saveAssessment" type="button">Salvar avaliação</button>
+        </div>
+        <div class="assessment-results" id="assessmentResults"></div>
+        <div class="assessment-visuals">
+          <article class="assessment-widget">
+            <div class="widget-head">
+              <div>
+                <h3>Composição corporal</h3>
+                <span>Distribuição estimada em kg</span>
+              </div>
+            </div>
+            <div id="compositionChart" class="composition-chart"></div>
+          </article>
+          <article class="assessment-widget">
+            <div class="widget-head">
+              <div>
+                <h3>Indicadores de risco</h3>
+                <span>Leitura rápida para reavaliação</span>
+              </div>
+            </div>
+            <div id="assessmentRisks" class="risk-grid"></div>
+          </article>
+          <article class="assessment-widget wide-widget">
+            <div class="widget-head">
+              <div>
+                <h3>Simetria de perimetrias</h3>
+                <span>Comparativo direito e esquerdo</span>
+              </div>
+            </div>
+            <div id="perimetryBalance" class="balance-chart"></div>
+          </article>
+        </div>
+        <form class="grid-form" id="assessmentForm">
+          <fieldset class="form-section wide">
+            <legend>Dados base</legend>
+            <div class="grid-form inner-grid">
+              <label>Data<input name="date" type="date" /></label>
+              <label>Peso corporal (kg)<input name="bodyWeight" type="number" step="0.1" /></label>
+              <label>Altura (cm)<input name="height" type="number" step="0.1" /></label>
+              <label>Idade<input name="age" type="number" min="1" max="120" /></label>
+              <label>Sexo para fórmula
+                <select name="formulaSex">
+                  <option value="">Usar cadastro</option>
+                  <option value="male">Masculino</option>
+                  <option value="female">Feminino</option>
+                </select>
+              </label>
+              <label>IMC<input name="bmi" readonly /></label>
+              <label>RCQ<input name="whr" readonly /></label>
+              <label>RCE<input name="waistHeightRatio" readonly /></label>
+              <label>Índice de conicidade<input name="conicityIndex" readonly /></label>
+            </div>
+          </fieldset>
+
+          <fieldset class="form-section wide">
+            <legend>Perimetrias (cm)</legend>
+            <div class="grid-form inner-grid">
+              <label>Pescoço<input name="neck" type="number" step="0.1" /></label>
+              <label>Ombro<input name="shoulder" type="number" step="0.1" /></label>
+              <label>Peito<input name="chest" type="number" step="0.1" /></label>
+              <label>Cintura<input name="waist" type="number" step="0.1" /></label>
+              <label>Abdômen<input name="abdomen" type="number" step="0.1" /></label>
+              <label>Quadril<input name="hip" type="number" step="0.1" /></label>
+              <label>Braço direito fletido<input name="rightArmFlexed" type="number" step="0.1" /></label>
+              <label>Braço direito relaxado<input name="rightArmRelaxed" type="number" step="0.1" /></label>
+              <label>ITM direito<input name="rightItm" readonly /></label>
+              <label>Antebraço direito<input name="rightForearm" type="number" step="0.1" /></label>
+              <label>Punho direito<input name="rightWrist" type="number" step="0.1" /></label>
+              <label>Braço esquerdo fletido<input name="leftArmFlexed" type="number" step="0.1" /></label>
+              <label>Braço esquerdo relaxado<input name="leftArmRelaxed" type="number" step="0.1" /></label>
+              <label>ITM esquerdo<input name="leftItm" readonly /></label>
+              <label>Antebraço esquerdo<input name="leftForearm" type="number" step="0.1" /></label>
+              <label>Punho esquerdo<input name="leftWrist" type="number" step="0.1" /></label>
+              <label>Coxa proximal direita<input name="rightThighProximal" type="number" step="0.1" /></label>
+              <label>Coxa mesofemoral direita<input name="rightThighMeso" type="number" step="0.1" /></label>
+              <label>Coxa distal direita<input name="rightThighDistal" type="number" step="0.1" /></label>
+              <label>Perna direita<input name="rightLeg" type="number" step="0.1" /></label>
+              <label>Coxa proximal esquerda<input name="leftThighProximal" type="number" step="0.1" /></label>
+              <label>Coxa mesofemoral esquerda<input name="leftThighMeso" type="number" step="0.1" /></label>
+              <label>Coxa distal esquerda<input name="leftThighDistal" type="number" step="0.1" /></label>
+              <label>Perna esquerda<input name="leftLeg" type="number" step="0.1" /></label>
+            </div>
+          </fieldset>
+
+          <fieldset class="form-section wide">
+            <legend>7 dobras cutâneas Jackson-Pollock (mm)</legend>
+            <div class="grid-form inner-grid">
+              <label>Peitoral<input name="skChest" type="number" step="0.1" /></label>
+              <label>Axilar média<input name="skMidaxillary" type="number" step="0.1" /></label>
+              <label>Tríceps<input name="skTriceps" type="number" step="0.1" /></label>
+              <label>Subescapular<input name="skSubscapular" type="number" step="0.1" /></label>
+              <label>Abdominal<input name="skAbdominal" type="number" step="0.1" /></label>
+              <label>Supra-ilíaca<input name="skSuprailiac" type="number" step="0.1" /></label>
+              <label>Coxa<input name="skThigh" type="number" step="0.1" /></label>
+              <label>Soma 7 dobras<input name="skinfoldSum" readonly /></label>
+              <label>Densidade corporal<input name="bodyDensity" readonly /></label>
+              <label>% Gordura<input name="bodyFat" type="number" step="0.1" /></label>
+            </div>
+          </fieldset>
+
+          <fieldset class="form-section wide">
+            <legend>Composição corporal</legend>
+            <div class="grid-form inner-grid">
+              <label>Massa gorda / PG (kg)<input name="fatMass" readonly /></label>
+              <label>Massa livre de gordura / PLG (kg)<input name="leanMass" readonly /></label>
+              <label>Peso residual / PR (kg)<input name="residualMass" readonly /></label>
+              <label>Diâmetro de rádio (mm)<input name="radiusDiameter" type="number" step="0.1" /></label>
+              <label>Diâmetro de fêmur (mm)<input name="femurDiameter" type="number" step="0.1" /></label>
+              <label>Peso ósseo / PO (kg)<input name="boneMass" readonly /></label>
+              <label>Peso muscular estimado / PM (kg)<input name="muscleMass" readonly /></label>
+            </div>
+          </fieldset>
+          <label class="wide">Anamnese e observações<textarea name="notes"></textarea></label>
+        </form>
+        <div class="assessment-explain">
+          <h3>Como o PLANNUM360 calcula</h3>
+          <p>O protocolo Jackson-Pollock de 7 dobras estima a densidade corporal a partir da soma das dobras, idade e sexo. Em seguida, a equação de Siri converte densidade em percentual de gordura. Com o percentual, o sistema calcula massa gorda, massa livre de gordura, peso residual, peso ósseo estimado e peso muscular estimado. A tela também calcula IMC, RCQ, relação cintura/estatura, índice de conicidade e índice de tonicidade muscular para orientar a leitura profissional da evolução.</p>
+        </div>
+        <div class="history">
+          <h3>Histórico</h3>
+          <div id="assessmentHistory" class="history-list"></div>
+        </div>
+      </section>
+
+      <section class="panel" id="planning">
+        <div class="section-head">
+          <div>
+            <h2>Periodização</h2>
+            <p>Organize mesociclos, semanas e foco do bloco de treino.</p>
+          </div>
+          <button class="primary-button" id="savePlan" type="button">Salvar bloco</button>
+        </div>
+        <form class="grid-form" id="planForm">
+          <label>Nome do bloco<input name="name" placeholder="Base, hipertrofia 1, força..." required /></label>
+          <label>Início<input name="start" type="date" /></label>
+          <label>Fim<input name="end" type="date" /></label>
+          <label>Objetivo
+            <select name="goal">
+              <option>Hipertrofia</option>
+              <option>Força</option>
+              <option>Resistência muscular</option>
+              <option>Emagrecimento</option>
+              <option>Recondicionamento</option>
+            </select>
+          </label>
+          <label>Frequência semanal<input name="frequency" type="number" min="1" max="7" /></label>
+          <label>Estratégia
+            <select name="strategy">
+              <option>Progressão linear</option>
+              <option>Ondulatória semanal</option>
+              <option>Bloco com deload</option>
+              <option>Manutenção técnica</option>
+            </select>
+          </label>
+          <label class="wide">Notas do bloco<textarea name="notes" placeholder="Critérios de progressão, deload, prioridade muscular..."></textarea></label>
+        </form>
+        <div class="history">
+          <h3>Blocos salvos</h3>
+          <div id="planHistory" class="history-list"></div>
+        </div>
+      </section>
+
+      <section class="panel" id="library">
+        <div class="section-head">
+          <div>
+            <h2>Biblioteca de exercícios</h2>
+            <p>Exercícios do canal Fifteen Seconds for Fit e exercícios adicionados manualmente.</p>
+          </div>
+          <button class="primary-button" id="addExercise" type="button">Adicionar exercício</button>
+        </div>
+        <div class="toolbar">
+          <input id="exerciseSearch" placeholder="Buscar por exercício, grupo muscular ou URL" />
+          <select id="exerciseGroupFilter">
+            <option value="">Todos os grupos</option>
+          </select>
+          <button class="ghost-button" id="favoriteOnly" type="button">Favoritos</button>
+        </div>
+        <form class="inline-form" id="exerciseForm">
+          <input name="name" placeholder="Nome do exercício" required />
+          <input name="group" placeholder="Grupo muscular" />
+          <input name="videoUrl" placeholder="URL do vídeo do YouTube" />
+          <button class="primary-button" type="submit">Salvar</button>
+        </form>
+        <div class="exercise-grid" id="exerciseGrid"></div>
+      </section>
+
+      <section class="panel" id="prescription">
+        <div class="section-head">
+          <div>
+            <h2>Prescrição de treino</h2>
+            <p>Monte treinos e calcule a carga sugerida por Baechle, 1992.</p>
+          </div>
+          <button class="primary-button" id="addPrescriptionRow" type="button">Adicionar exercício</button>
+        </div>
+        <div class="workout-meta">
+          <label>Nome do treino<input id="workoutName" placeholder="Treino A - Inferiores" /></label>
+          <label>Data<input id="workoutDate" type="date" /></label>
+          <label>Foco<input id="workoutFocus" placeholder="Hipertrofia, força, resistência..." /></label>
+          <label>Dia da semana
+            <select id="workoutDay">
+              <option>Segunda</option>
+              <option>Terça</option>
+              <option>Quarta</option>
+              <option>Quinta</option>
+              <option>Sexta</option>
+              <option>Sábado</option>
+              <option>Domingo</option>
+            </select>
+          </label>
+          <label>Método<input id="workoutMethod" placeholder="Tradicional, bi-set, drop-set..." /></label>
+          <label>Intensidade alvo<input id="workoutIntensity" placeholder="RPE 7-9, RIR 1-3..." /></label>
+        </div>
+        <div class="toolbar">
+          <button class="ghost-button" data-template="upper" type="button">Modelo superior</button>
+          <button class="ghost-button" data-template="lower" type="button">Modelo inferior</button>
+          <button class="ghost-button" data-template="full" type="button">Modelo full body</button>
+        </div>
+        <div class="table-wrap">
+          <table class="workout-table">
+            <thead>
+              <tr>
+                <th>Exercício</th>
+                <th>Séries</th>
+                <th>Repetições</th>
+                <th>Peso</th>
+                <th>Intervalo</th>
+                <th>Tempo</th>
+                <th>RPE</th>
+                <th>Teste Baechle</th>
+                <th>Carga sugerida</th>
+                <th>Observações</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="prescriptionRows"></tbody>
+          </table>
+        </div>
+        <div class="footer-actions">
+          <button class="primary-button" id="saveWorkout" type="button">Salvar prescrição</button>
+          <button class="ghost-button" id="shareWorkout" type="button">Copiar resumo</button>
+          <button class="ghost-button" id="printWorkout" type="button">Imprimir</button>
+        </div>
+        <div class="history">
+          <h3>Prescrições salvas</h3>
+          <div id="workoutHistory" class="history-list"></div>
+        </div>
+      </section>
+
+      <section class="panel student-mobile-panel" id="studentApp">
+        <div class="student-topbar">
+          <div>
+            <p class="eyebrow dark">Área do aluno</p>
+            <h2 id="studentAppTitle">Treino do dia</h2>
+            <p id="studentAppSubtitle">Experiência mobile para execução do treino, vídeos e feedback.</p>
+          </div>
+          <select id="studentWorkoutSelect"></select>
+        </div>
+        <div class="student-actions">
+          <button class="primary-button" id="startStudentWorkout" type="button">Iniciar treino</button>
+          <button class="ghost-button" id="finishStudentWorkout" type="button">Finalizar e enviar feedback</button>
+          <button class="ghost-button" id="resetStudentWorkout" type="button">Reiniciar checklist</button>
+          <button class="ghost-button" id="expandAllExercises" type="button">Expandir todos</button>
+          <button class="ghost-button" id="collapseAllExercises" type="button">Recolher todos</button>
+        </div>
+        <div class="workout-progress">
+          <div>
+            <strong id="workoutProgressText">0%</strong>
+            <span>do treino concluído</span>
+          </div>
+          <div class="progress-track"><span id="workoutProgressBar"></span></div>
+        </div>
+        <div class="rest-timer">
+          <div>
+            <span>Descanso</span>
+            <strong id="timerDisplay">00:00</strong>
+          </div>
+          <div class="timer-buttons">
+            <button class="ghost-button" data-rest="30" type="button">30s</button>
+            <button class="ghost-button" data-rest="60" type="button">60s</button>
+            <button class="ghost-button" data-rest="90" type="button">90s</button>
+            <button class="ghost-button" id="stopTimer" type="button">Parar</button>
+          </div>
+        </div>
+        <div class="student-workout-list" id="studentWorkoutCards"></div>
+        <form class="mobile-feedback" id="studentFeedbackForm">
+          <label>RPE geral<input name="rpe" type="number" min="1" max="10" placeholder="1 a 10" /></label>
+          <label>Dor/desconforto<input name="pain" placeholder="0-10 e local" /></label>
+          <label class="wide">Feedback do treino<textarea name="feedback" placeholder="O que foi fácil, difícil, dor, exercício que precisa ajustar..."></textarea></label>
+        </form>
+      </section>
+
+      <section class="panel" id="followup">
+        <div class="section-head">
+          <div>
+            <h2>Acompanhamento</h2>
+            <p>Registre execução, feedback, dor, fadiga e ajustes para o próximo treino.</p>
+          </div>
+          <button class="primary-button" id="saveSession" type="button">Salvar execução</button>
+        </div>
+        <form class="grid-form" id="sessionForm">
+          <label>Data<input name="date" type="date" /></label>
+          <label>Treino realizado
+            <select name="workoutId" id="sessionWorkout"></select>
+          </label>
+          <label>Status
+            <select name="status">
+              <option>Concluído</option>
+              <option>Parcial</option>
+              <option>Não realizado</option>
+            </select>
+          </label>
+          <label>RPE geral<input name="rpe" type="number" min="1" max="10" /></label>
+          <label>Dor/desconforto<input name="pain" placeholder="0-10 e local" /></label>
+          <label>Fadiga<input name="fatigue" placeholder="Baixa, moderada, alta" /></label>
+          <label class="wide">Feedback do aluno<textarea name="feedback"></textarea></label>
+          <label class="wide">Ajuste para próxima prescrição<textarea name="nextAdjustment" placeholder="Subir carga, manter, trocar exercício, reduzir volume..."></textarea></label>
+        </form>
+        <div class="history">
+          <h3>Linha do tempo</h3>
+          <div id="sessionHistory" class="history-list"></div>
+        </div>
+      </section>
+
+      <section class="panel" id="schedule">
+        <div class="section-head">
+          <div>
+            <h2>Agenda</h2>
+            <p>Organize avaliações, vencimentos, revisões de treino e contatos com o aluno.</p>
+          </div>
+          <button class="primary-button" id="saveAppointment" type="button">Salvar compromisso</button>
+        </div>
+        <form class="grid-form" id="appointmentForm">
+          <label>Data<input name="date" type="date" /></label>
+          <label>Horário<input name="time" type="time" /></label>
+          <label>Tipo
+            <select name="type">
+              <option>Reavaliação</option>
+              <option>Troca de treino</option>
+              <option>Check-in</option>
+              <option>Pagamento</option>
+              <option>Consulta presencial</option>
+            </select>
+          </label>
+          <label>Status
+            <select name="status">
+              <option>Pendente</option>
+              <option>Concluído</option>
+              <option>Remarcado</option>
+            </select>
+          </label>
+          <label class="wide">Descrição<textarea name="description" placeholder="O que precisa ser feito"></textarea></label>
+        </form>
+        <div class="history">
+          <h3>Próximos compromissos</h3>
+          <div id="appointmentHistory" class="history-list"></div>
+        </div>
+      </section>
+
+      <section class="panel" id="finance">
+        <div class="section-head">
+          <div>
+            <h2>Financeiro e planos</h2>
+            <p>Controle local de planos, vencimentos e pagamentos da consultoria.</p>
+          </div>
+          <button class="primary-button" id="saveInvoice" type="button">Salvar cobrança</button>
+        </div>
+        <form class="grid-form" id="invoiceForm">
+          <label>Plano<input name="plan" placeholder="Mensal, trimestral, presencial..." /></label>
+          <label>Valor (R$)<input name="amount" type="number" min="0" step="0.01" /></label>
+          <label>Vencimento<input name="dueDate" type="date" /></label>
+          <label>Status
+            <select name="status">
+              <option>Aberto</option>
+              <option>Pago</option>
+              <option>Atrasado</option>
+              <option>Cancelado</option>
+            </select>
+          </label>
+          <label>Forma de pagamento<input name="method" placeholder="Pix, cartão, dinheiro..." /></label>
+          <label>Recorrência
+            <select name="recurrence">
+              <option>Mensal</option>
+              <option>Trimestral</option>
+              <option>Semestral</option>
+              <option>Anual</option>
+              <option>Avulso</option>
+            </select>
+          </label>
+          <label class="wide">Observações<textarea name="notes"></textarea></label>
+        </form>
+        <div class="history">
+          <h3>Cobranças</h3>
+          <div id="invoiceHistory" class="history-list"></div>
+        </div>
+      </section>
+
+      <section class="panel" id="reports">
+        <div class="section-head">
+          <div>
+            <h2>Relatórios</h2>
+            <p>Gere um resumo profissional de evolução, aderência, próximos passos e prescrição.</p>
+          </div>
+          <button class="primary-button" id="copyReport" type="button">Copiar relatório</button>
+        </div>
+        <div class="report-grid">
+          <div class="report-preview" id="reportPreview"></div>
+          <div class="report-side">
+            <h3>Envio rápido</h3>
+            <p>Use o texto gerado para enviar por WhatsApp ou guardar no prontuário local.</p>
+            <a class="primary-button report-link" id="whatsappReport" target="_blank" rel="noreferrer">Abrir WhatsApp</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" id="settings">
+        <div class="section-head">
+          <div>
+            <h2>Ajustes</h2>
+            <p>Configurações locais, privacidade e backup do seu app.</p>
+          </div>
+          <button class="primary-button" id="saveSettings" type="button">Salvar ajustes</button>
+        </div>
+        <form class="grid-form" id="settingsForm">
+          <label>Nome do profissional<input name="coachName" placeholder="Seu nome" /></label>
+          <label>CREF<input name="cref" placeholder="CREF..." /></label>
+          <label>WhatsApp<input name="whatsapp" placeholder="5581999999999" /></label>
+          <label>PIN local opcional<input name="pin" type="password" inputmode="numeric" placeholder="4 a 8 dígitos" /></label>
+          <label class="wide">Assinatura do relatório<textarea name="signature" placeholder="Mensagem padrão para relatórios e prescrições"></textarea></label>
+        </form>
+        <div class="footer-actions">
+          <button class="ghost-button" id="lockApp" type="button">Bloquear agora</button>
+          <button class="ghost-button danger" id="clearData" type="button">Limpar dados locais</button>
+        </div>
+      </section>
+    </main>
+
+    <div class="login-screen" id="loginScreen">
+      <div class="login-box">
+        <img class="login-logo" src="assets/logo_plannum360.png" alt="PLANNUM360" />
+        <p class="eyebrow dark">Entrar no app</p>
+        <h2>Escolha seu acesso</h2>
+        <p>Professor vê o sistema completo. Aluno usa e-mail e data de nascimento cadastrados pelo professor.</p>
+        <div class="role-switch" aria-label="Tipo de acesso">
+          <button class="active" data-login-role="teacher" type="button">Professor</button>
+          <button data-login-role="student" type="button">Aluno</button>
+        </div>
+        <label id="loginEmailLabel" hidden>E-mail do aluno<input id="loginEmail" type="email" placeholder="aluno@email.com" autocomplete="username" /></label>
+        <label id="loginCodeLabel">PIN do professor<input id="loginCode" type="password" inputmode="text" placeholder="Opcional se não configurado" autocomplete="current-password" /></label>
+        <button class="primary-button" id="loginApp" type="button">Entrar</button>
+        <small id="loginHint">Configure um PIN em Ajustes para proteger o acesso do professor.</small>
+      </div>
+    </div>
+    <div class="toast-stack" id="toastStack" aria-live="polite" aria-atomic="true"></div>
+
+    <template id="exerciseCardTemplate">
+      <article class="exercise-card">
+        <div class="video-frame"></div>
+        <div class="exercise-body">
+          <span class="badge"></span>
+          <h3></h3>
+          <a target="_blank" rel="noreferrer">Abrir vídeo</a>
+        </div>
+      </article>
+    </template>
+
+    <script src="app.js" type="module"></script>
+  </body>
+</html>
